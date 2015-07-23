@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:spring="http://www.springframework.org/schema/beans" version="CE-3.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+
+
+	<spring:beans>
+		<spring:bean id="FileUnzipTransformer" name="FileUnzipTransformer" class="test.FileUnzipTransformer">
+		</spring:bean>
+        <spring:bean id="unzipTransformer" name="unzipTransformer" class="test.UnzipTransformer"/>
+	</spring:beans>
+	
+    <notifications dynamic="true">
+        <notification event="ENDPOINT-MESSAGE"/>
+    </notifications>
+    
+    <vm:connector name="persistentVM" doc:name="VM">
+       <vm:queue-profile maxOutstandingMessages="500">
+          <default-persistent-queue-store></default-persistent-queue-store>
+       </vm:queue-profile>
+    </vm:connector>
+    
+    <file:connector name="fileConnector-1" streaming="true" doc:name="File"/>
+    
+    
+    <flow name="get-zip-file"  processingStrategy="synchronous" doc:name="get-zip-file">
+        <file:inbound-endpoint path="./data/zip/in" pollingFrequency="6000" connector-ref="fileConnector-1" doc:name="File">
+            <file:filename-regex-filter pattern=".*zip$" caseSensitive="false"/>
+        </file:inbound-endpoint>
+        <set-property value="#[message.inboundProperties.originalFilename.substring(0,2)]" propertyName="MULE_CORRELATION_ID" doc:name="Property" />
+        <set-property value="2" propertyName="MULE_CORRELATION_GROUP_SIZE" doc:name="Property" />
+<!--         <logger message="the batch id - #[message.correlationId]" level="INFO" doc:name="Logger"/> -->
+        <logger message=">> get-zip-file thread name: #[java.lang.Thread.currentThread().getName()]" level="WARN" doc:name="Logger"/>
+        <vm:outbound-endpoint exchange-pattern="one-way" path="queue.files.in" connector-ref="persistentVM" doc:name="VM"/>
+    </flow>
+    
+    <flow name="process-files-flow" processingStrategy="synchronous" doc:name="process-files-flow">
+    	<vm:inbound-endpoint exchange-pattern="one-way" connector-ref="persistentVM" path="queue.files.in" doc:name="VM"/>
+<!--     	<logger message="inside custom unzip transformer - #[message.inboundProperties.filename]" level="INFO" doc:name="Logger"/> -->
+    	<!-- unzip files -->
+		<transformer ref="FileUnzipTransformer" doc:name="uncompress files" />
+		<!-- put files in data in directory  -->
+		<file:outbound-endpoint path="./data/in"  connector-ref="fileConnector-1" doc:name="File"/>	
+		<!--  -->
+    	<choice  doc:name="Choice">
+            <when expression="(message.inboundProperties.filename contains 'csv')">
+            	<set-property value="1" propertyName="MULE_CORRELATION_SEQUENCE" doc:name="Property" />
+            	<flow-ref name="flow3" doc:name="Flow Reference"/>
+            </when>
+            <otherwise>
+            	<set-property value="2" propertyName="MULE_CORRELATION_SEQUENCE" doc:name="Property" />
+                <flow-ref name="flow2" doc:name="Flow Reference"/>
+            </otherwise>
+        </choice>
+        <logger message="End --process-files-flow-- " level="WARN" doc:name="Logger"/>
+    </flow>
+    
+      
+    <sub-flow name="flow2" doc:name="flow2" >
+    	<file:outbound-endpoint path="./data/out/xml" connector-ref="fileConnector-1" outputPattern="#[message.inboundProperties.filename]" doc:name="File"/>
+        <logger message=">> FLOW-2 thread name: #[java.lang.Thread.currentThread().getName()]" level="WARN" doc:name="Logger"/>
+        <logger message="FLOW-2 batch id - #[message]" level="INFO" doc:name="Logger"/>
+        <object-to-string-transformer doc:name="Object to String"/>
+        <component doc:name="Java">
+            <singleton-object class="test.XmlFileProcessor"/>
+        </component>
+        <logger message="End --flow2-- #[message]" level="WARN" doc:name="Logger"/>
+        <vm:outbound-endpoint exchange-pattern="one-way" path="queue.complete" connector-ref="persistentVM" doc:name="VM"/>
+    </sub-flow>
+    
+    <sub-flow name="flow3" doc:name="flow3" >
+    	<file:outbound-endpoint path="./data/out/csv" connector-ref="fileConnector-1" outputPattern="#[message.inboundProperties.filename]" doc:name="File"/>
+        <logger message=">> FLOW-3 thread name: #[java.lang.Thread.currentThread().getName()]" level="WARN" doc:name="Logger"/>
+         <logger message="FLOW-3 batch id - #[message]" level="INFO" doc:name="Logger"/>
+        <object-to-string-transformer doc:name="Object to String"/>
+        <component doc:name="Java">
+            <singleton-object class="test.CsvFileProcessor"/>
+        </component>
+        <logger message="End --flow3-- #[message]" level="WARN" doc:name="Logger"/>
+        <vm:outbound-endpoint exchange-pattern="one-way" path="queue.complete" connector-ref="persistentVM" doc:name="VM"/>
+    </sub-flow>
+    
+    <flow name="aggregate-flow">
+    	<vm:inbound-endpoint exchange-pattern="one-way" connector-ref="persistentVM" path="queue.complete" doc:name="VM"/>
+    	<collection-aggregator failOnTimeout="true" timeout="20000"/>
+    	<logger message="final message - #[message + payload]" level="INFO" doc:name="Logger"/>
+    	<logger message="processing complete for - #[message.inboundProperties.filename]" level="INFO" doc:name="Logger"/>
+    </flow>
+ 
+    
+</mule>
