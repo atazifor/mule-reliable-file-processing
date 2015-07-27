@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
@@ -27,6 +28,7 @@ public class TestFileAggregation extends FunctionalTestCase {
 	
 	CountDownLatch dispatcLatch;
 	CountDownLatch receiveLatch;
+	CountDownLatch dlqReceiveLatch;
 	
 	@Override
 	protected String getConfigResources() {
@@ -55,7 +57,11 @@ public class TestFileAggregation extends FunctionalTestCase {
                 		receiveLatch.countDown();
                 	if("end dispatch".equals(notification.getActionName()))
                 		dispatcLatch.countDown();
-                }		
+                }
+                if ("dead_queue-letter-flow".equals(notification.getResourceIdentifier())){
+                	if("receive".equals(notification.getActionName()))
+                		dlqReceiveLatch.countDown();
+                }
             }
         });
         
@@ -82,6 +88,34 @@ public class TestFileAggregation extends FunctionalTestCase {
 			//zip("./data/zip", "./data/zip/in/archive.zip");
 			assertTrue(receiveLatch.await(getTestTimeoutSecs(), TimeUnit.SECONDS));
 			assertTrue(dispatcLatch.await(getTestTimeoutSecs(), TimeUnit.SECONDS));
+	}
+	
+	/*
+	 * 
+	 */
+	@Test
+	public void testInconsistentFiles() throws Exception{
+		int counter = 5; //total of 10 files; 5 csv, 5 xml
+		receiveLatch = new CountDownLatch(counter*2 + 1);// 10 files should be processed in groups of 2 [+1 for extra file]
+        dispatcLatch = new CountDownLatch(counter);//5 groups of files (after aggregation)
+        dlqReceiveLatch = new CountDownLatch(1); //1 incomplete group
+	        assertThat(0, is(FileUtils.listFiles(new File("./data/out"), new String[]{"xml", "csv"}, false).size()));
+	        File csvFile;
+	        File xmlFile;
+	        for (int i = 0; i < 5; i++) {
+				csvFile = new File("./data/zip/1"+i+"-first"+i+".csv");
+				xmlFile = new File("./data/zip/1"+i+"-second"+i+".xml");
+				FileUtils.writeStringToFile(csvFile, "csv is okay "+ i);
+				FileUtils.writeStringToFile(xmlFile, "xml is better " + i);
+			}
+	        xmlFile = new File("./data/zip/2"+2+"-bad"+2+".xml");
+			FileUtils.writeStringToFile(xmlFile, "BAD XML is NOT okay");
+			
+			createZipFile("./data/zip", "./data/zip/in");
+			//zip("./data/zip", "./data/zip/in/archive.zip");
+			assertTrue(receiveLatch.await(getTestTimeoutSecs(), TimeUnit.SECONDS));
+			assertTrue(dispatcLatch.await(getTestTimeoutSecs(), TimeUnit.SECONDS));
+			assertTrue(dlqReceiveLatch.await(getTestTimeoutSecs(), TimeUnit.SECONDS));
 	}
 	
 	private void createZipFile(String srcDir, String zipFile) throws Exception{

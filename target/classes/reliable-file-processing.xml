@@ -13,10 +13,13 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 		</spring:bean>
         <spring:bean id="unzipTransformer" name="unzipTransformer" class="test.UnzipTransformer"/>
         <spring:bean id="correlationId" name="correlationId" class="test.transformer.CorrelationIdProcessor" scope="singleton"/>
+        <spring:bean id="correlationTimeoutListener" name="correlationTimeoutListener" class="test.listeners.CorrelationTimeoutListener"/>
 	</spring:beans>
 	
     <notifications dynamic="true">
         <notification event="ENDPOINT-MESSAGE"/>
+        <notification event="ROUTING"/> <!-- deliver routing notification -->
+        <notification-listener ref="correlationTimeoutListener"/>
     </notifications>
     
     <vm:connector name="persistentVM" doc:name="VM">
@@ -94,6 +97,11 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
     	<logger message="final message - #[message + payload]" level="INFO" doc:name="Logger"/>
     	<logger message="processing complete for - #[message.inboundProperties.filename]" level="INFO" doc:name="Logger"/>
     	<vm:outbound-endpoint exchange-pattern="one-way" path="queue.complete.next" connector-ref="persistentVM" doc:name="VM"/>
+    </flow>
+    
+    <flow name="dead_queue-letter-flow" doc:name="reliable-file-processingFlow1">
+        <vm:inbound-endpoint exchange-pattern="one-way" path="default.error" connector-ref="persistentVM" doc:name="VM"/>
+        <null-component></null-component> <!-- to complete flow, otherwise flow is seen as incomplete -->
     </flow>
  
     
