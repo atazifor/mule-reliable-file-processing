@@ -46,7 +46,30 @@
             <property name="depends-on"/>
         </properties>
     </global-element>
-    <global-unknown description="false" index="4" entity-id="global-unknown#1">
+    <global-element name="Bean" type="http://www.springframework.org/schema/beans/bean" entity-id="Bean#3">
+        <properties>
+            <property name="factory-bean"/>
+            <property name="abstract"/>
+            <property name="scope" value="singleton"/>
+            <property name="init-method"/>
+            <property name="autowire-candidate"/>
+            <property name="factory-method"/>
+            <property name="class" value="test.transformer.CorrelationIdProcessor"/>
+            <property name="parent"/>
+            <property name="children"/>
+            <property name="lazy-init"/>
+            <property name="auxiliary;wrappedIn" value="beans@spring@http://www.springframework.org/schema/beans"/>
+            <property name="id" value="correlationId"/>
+            <property name="primary"/>
+            <property name="name" value="correlationId"/>
+            <property name="autowire"/>
+            <property name="destroy-method"/>
+            <property name="auxiliary;index" value="4"/>
+            <property name="auxiliary;wrapIn" value="1"/>
+            <property name="depends-on"/>
+        </properties>
+    </global-element>
+    <global-unknown description="false" index="5" entity-id="global-unknown#1">
         <content>&lt;notifications xmlns=&quot;http://www.mulesoft.org/schema/mule/core&quot; dynamic=&quot;true&quot;&gt;
         &lt;notification event=&quot;ENDPOINT-MESSAGE&quot;/&gt;
     &lt;/notifications&gt;</content>
@@ -58,11 +81,11 @@
             <property name="validateConnections"/>
             <property name="dynamicNotification"/>
             <property name="queueTimeout"/>
-            <property name="auxiliary;index" value="6"/>
+            <property name="auxiliary;index" value="7"/>
             <property-collection name="@http://www.mulesoft.org/schema/mule/vm/queue-profile;0">
                 <property name="maxOutstandingMessages" value="500"/>
-                <property name="auxiliary;index" value="7"/>
-                <property name="auxiliary;wrapIn" value="7"/>
+                <property name="auxiliary;index" value="8"/>
+                <property name="auxiliary;wrapIn" value="8"/>
             </property-collection>
         </properties>
     </global-element>
@@ -88,16 +111,16 @@
             <property name="autoDelete"/>
             <property name="dynamicNotification"/>
             <property name="outputPattern"/>
-            <property name="auxiliary;index" value="9"/>
+            <property name="auxiliary;index" value="10"/>
         </properties>
     </global-element>
-    <flow SubFlow="false" name="get-zip-file" entity-id="14cd72c9-0dbc-44f5-8229-120a42d1dc0b">
+    <flow SubFlow="false" name="get-zip-file" entity-id="5e70f22e-60b7-4582-bed2-75e14de0a161">
         <properties>
             <property name="processingStrategy" value="synchronous"/>
             <property name="processingStrategy2" value="synchronous"/>
             <property name="bussinessEventsLabel"/>
             <property name="tracking:enable-default-events"/>
-            <property name="auxiliary;index" value="10"/>
+            <property name="auxiliary;index" value="11"/>
         </properties>
         <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#1">
             <graphicalData x="0" y="0" width="0" height="0"/>
@@ -121,33 +144,36 @@
                     <property name="path" value="./data/zip/in"/>
                     <property name="outputPattern"/>
                     <property name="mimeType"/>
-                    <property name="auxiliary;index" value="11"/>
+                    <property name="auxiliary;index" value="12"/>
                     <property name="responseTimeout"/>
                     <property name="connector-ref" value="fileConnector-1"/>
                     <property-collection name="@http://www.mulesoft.org/schema/mule/file/filename-regex-filter;0">
                         <property name="pattern" value=".*zip$"/>
                         <property name="caseSensitive" value="false"/>
-                        <property name="auxiliary;index" value="12"/>
-                        <property name="auxiliary;wrapIn" value="12"/>
+                        <property name="auxiliary;index" value="13"/>
+                        <property name="auxiliary;wrapIn" value="13"/>
                     </property-collection>
                 </properties>
             </endpoint>
-            <pattern name="Property" type="http://www.mulesoft.org/schema/mule/core/properties-transformer" entity-id="Property#1">
+            <pattern name="Java" type="http://www.mulesoft.org/schema/mule/core/component" entity-id="Java#1">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
-                    <property name="propertyName" value="MULE_CORRELATION_ID"/>
-                    <property name="value" value="#[message.inboundProperties.originalFilename.substring(0,2)]"/>
-                    <property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/core/set-property"/>
-                    <property name="auxiliary;index" value="13"/>
+                    <property name="class"/>
+                    <property name="auxiliary;index" value="14"/>
+                    <property-collection name="@http://www.mulesoft.org/schema/mule/core/spring-object;0">
+                        <property name="bean" value="correlationId"/>
+                        <property name="auxiliary;index" value="15"/>
+                        <property name="auxiliary;wrapIn" value="15"/>
+                    </property-collection>
                 </properties>
             </pattern>
-            <pattern name="Property" type="http://www.mulesoft.org/schema/mule/core/properties-transformer" entity-id="Property#2">
+            <pattern name="Property" type="http://www.mulesoft.org/schema/mule/core/properties-transformer" entity-id="Property#1">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
                     <property name="propertyName" value="MULE_CORRELATION_GROUP_SIZE"/>
                     <property name="value" value="2"/>
                     <property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/core/set-property"/>
-                    <property name="auxiliary;index" value="14"/>
+                    <property name="auxiliary;index" value="16"/>
                 </properties>
             </pattern>
             <pattern name="Logger" type="http://www.mulesoft.org/schema/mule/core/logger" entity-id="Logger#1">
@@ -156,41 +182,10 @@
                     <property name="message" value="&gt;&gt; get-zip-file thread name: #[java.lang.Thread.currentThread().getName()]"/>
                     <property name="category"/>
                     <property name="level" value="WARN"/>
-                    <property name="auxiliary;index" value="15"/>
+                    <property name="auxiliary;index" value="17"/>
                 </properties>
             </pattern>
             <endpoint direction="Outbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#2">
-                <graphicalData x="0" y="0" width="0" height="0"/>
-                <properties>
-                    <property name="ref"/>
-                    <property name="transformer-refs"/>
-                    <property name="address"/>
-                    <property name="businessEventsLabel"/>
-                    <property name="encoding"/>
-                    <property name="path" value="queue.files.in"/>
-                    <property name="responseTransformer-refs"/>
-                    <property name="disableTransportTransformer"/>
-                    <property name="mimeType"/>
-                    <property name="responseTimeout"/>
-                    <property name="tracking:enable-default-events"/>
-                    <property name="auxiliary;index" value="16"/>
-                    <property name="exchange-pattern" value="one-way"/>
-                    <property name="connector-ref" value="persistentVM"/>
-                </properties>
-            </endpoint>
-        </lane>
-    </flow>
-    <flow SubFlow="false" name="process-files-flow" entity-id="05068f77-4fd6-4d25-a744-d53a0d260ca3">
-        <properties>
-            <property name="processingStrategy" value="synchronous"/>
-            <property name="processingStrategy2" value="synchronous"/>
-            <property name="bussinessEventsLabel"/>
-            <property name="tracking:enable-default-events"/>
-            <property name="auxiliary;index" value="17"/>
-        </properties>
-        <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#2">
-            <graphicalData x="0" y="0" width="0" height="0"/>
-            <endpoint direction="Inbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#3">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
                     <property name="ref"/>
@@ -209,11 +204,42 @@
                     <property name="connector-ref" value="persistentVM"/>
                 </properties>
             </endpoint>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="process-files-flow" entity-id="4e3a8923-35c6-410f-af7f-33712bc20997">
+        <properties>
+            <property name="processingStrategy" value="synchronous"/>
+            <property name="processingStrategy2" value="synchronous"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+            <property name="auxiliary;index" value="19"/>
+        </properties>
+        <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#2">
+            <graphicalData x="0" y="0" width="0" height="0"/>
+            <endpoint direction="Inbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#3">
+                <graphicalData x="0" y="0" width="0" height="0"/>
+                <properties>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                    <property name="address"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="encoding"/>
+                    <property name="path" value="queue.files.in"/>
+                    <property name="responseTransformer-refs"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="mimeType"/>
+                    <property name="responseTimeout"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="auxiliary;index" value="20"/>
+                    <property name="exchange-pattern" value="one-way"/>
+                    <property name="connector-ref" value="persistentVM"/>
+                </properties>
+            </endpoint>
             <pattern name="uncompress files" type="org.mule.tooling.ui.modules.core.pattern.globalXformRef" entity-id="Transformer Reference#1">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
                     <property name="ref" value="FileUnzipTransformer"/>
-                    <property name="auxiliary;index" value="19"/>
+                    <property name="auxiliary;index" value="21"/>
                 </properties>
             </pattern>
             <endpoint direction="Outbound" message-exchange-pattern="OneWay" name="File" type="http://www.mulesoft.org/schema/mule/file/endpoint" entity-id="File#3">
@@ -236,19 +262,19 @@
                     <property name="path" value="./data/in"/>
                     <property name="outputPattern"/>
                     <property name="mimeType"/>
-                    <property name="auxiliary;index" value="20"/>
+                    <property name="auxiliary;index" value="22"/>
                     <property name="responseTimeout"/>
                     <property name="connector-ref" value="fileConnector-1"/>
                 </properties>
             </endpoint>
-            <splitter index="21" name="Choice" type="org.mule.tooling.ui.modules.core.pattern.cbr" entity-id="Choice#1">
+            <splitter index="23" name="Choice" type="org.mule.tooling.ui.modules.core.pattern.cbr" entity-id="Choice#1">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
-                    <property-collection name="0aa89818-4deb-4ae9-bfbb-030fdc69a799">
+                    <property-collection name="67de0bae-5461-4737-970e-7bd2e32aa450">
                         <property name="choice.otherwise" value="true"/>
                         <property-collection name="choice.attributes"/>
                     </property-collection>
-                    <property-collection name="e0a53a4b-0b7a-4155-bd1f-b022012cc99e">
+                    <property-collection name="2b39863e-3542-4040-92f5-de7209fd2160">
                         <property name="choice.expression" value="(message.inboundProperties.filename contains 'csv')"/>
                         <property-collection name="choice.attributes">
                             <property name="expression" value="(message.inboundProperties.filename contains 'csv')"/>
@@ -257,39 +283,39 @@
                 </properties>
                 <pattern name="Choice" type="org.mule.tooling.ui.modules.core.pattern.cbr" entity-id="Choice#2"/>
                 <compartment entity-id="compartment#1">
-                    <lane hadOnlyOneElement="false" index="23" isChoiceOtherwiseLane="false" entity-id="e0a53a4b-0b7a-4155-bd1f-b022012cc99e">
-                        <pattern name="Property" type="http://www.mulesoft.org/schema/mule/core/properties-transformer" entity-id="Property#3">
+                    <lane hadOnlyOneElement="false" index="25" isChoiceOtherwiseLane="false" entity-id="2b39863e-3542-4040-92f5-de7209fd2160">
+                        <pattern name="Property" type="http://www.mulesoft.org/schema/mule/core/properties-transformer" entity-id="Property#2">
                             <graphicalData x="0" y="0" width="0" height="0"/>
                             <properties>
 <property name="propertyName" value="MULE_CORRELATION_SEQUENCE"/>
 <property name="value" value="1"/>
 <property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/core/set-property"/>
-<property name="auxiliary;index" value="23"/>
+<property name="auxiliary;index" value="25"/>
                             </properties>
                         </pattern>
                         <pattern name="Flow Reference" type="http://www.mulesoft.org/schema/mule/core/flow-ref" entity-id="Flow Reference#1">
                             <graphicalData x="0" y="0" width="0" height="0"/>
                             <properties>
 <property name="name" value="flow3"/>
-<property name="auxiliary;index" value="24"/>
+<property name="auxiliary;index" value="26"/>
                             </properties>
                         </pattern>
                     </lane>
-                    <lane hadOnlyOneElement="false" index="26" isChoiceOtherwiseLane="true" entity-id="0aa89818-4deb-4ae9-bfbb-030fdc69a799">
-                        <pattern name="Property" type="http://www.mulesoft.org/schema/mule/core/properties-transformer" entity-id="Property#4">
+                    <lane hadOnlyOneElement="false" index="28" isChoiceOtherwiseLane="true" entity-id="67de0bae-5461-4737-970e-7bd2e32aa450">
+                        <pattern name="Property" type="http://www.mulesoft.org/schema/mule/core/properties-transformer" entity-id="Property#3">
                             <graphicalData x="0" y="0" width="0" height="0"/>
                             <properties>
 <property name="propertyName" value="MULE_CORRELATION_SEQUENCE"/>
 <property name="value" value="2"/>
 <property name="org.mule.tooling.ui.modules.core.widgets.meta.ModeAttribute" value="http://www.mulesoft.org/schema/mule/core/set-property"/>
-<property name="auxiliary;index" value="26"/>
+<property name="auxiliary;index" value="28"/>
                             </properties>
                         </pattern>
                         <pattern name="Flow Reference" type="http://www.mulesoft.org/schema/mule/core/flow-ref" entity-id="Flow Reference#2">
                             <graphicalData x="0" y="0" width="0" height="0"/>
                             <properties>
 <property name="name" value="flow2"/>
-<property name="auxiliary;index" value="27"/>
+<property name="auxiliary;index" value="29"/>
                             </properties>
                         </pattern>
                     </lane>
@@ -301,18 +327,18 @@
                     <property name="message" value="End --process-files-flow-- "/>
                     <property name="category"/>
                     <property name="level" value="WARN"/>
-                    <property name="auxiliary;index" value="28"/>
+                    <property name="auxiliary;index" value="30"/>
                 </properties>
             </pattern>
         </lane>
     </flow>
-    <flow SubFlow="true" name="flow2" entity-id="5295f574-5d04-40c9-a342-c726c34908f9">
+    <flow SubFlow="true" name="flow2" entity-id="37b8aba3-e203-4aa5-a9d4-8c570e07eefc">
         <properties>
             <property name="processingStrategy"/>
             <property name="processingStrategy2"/>
             <property name="bussinessEventsLabel"/>
             <property name="tracking:enable-default-events"/>
-            <property name="auxiliary;index" value="29"/>
+            <property name="auxiliary;index" value="31"/>
         </properties>
         <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#3">
             <graphicalData x="0" y="0" width="0" height="0"/>
@@ -336,7 +362,7 @@
                     <property name="path" value="./data/out/xml"/>
                     <property name="outputPattern" value="#[message.inboundProperties.filename]"/>
                     <property name="mimeType"/>
-                    <property name="auxiliary;index" value="30"/>
+                    <property name="auxiliary;index" value="32"/>
                     <property name="responseTimeout"/>
                     <property name="connector-ref" value="fileConnector-1"/>
                 </properties>
@@ -347,7 +373,7 @@
                     <property name="message" value="&gt;&gt; FLOW-2 thread name: #[java.lang.Thread.currentThread().getName()]"/>
                     <property name="category"/>
                     <property name="level" value="WARN"/>
-                    <property name="auxiliary;index" value="31"/>
+                    <property name="auxiliary;index" value="33"/>
                 </properties>
             </pattern>
             <pattern name="Logger" type="http://www.mulesoft.org/schema/mule/core/logger" entity-id="Logger#4">
@@ -356,7 +382,7 @@
                     <property name="message" value="FLOW-2 batch id - #[message]"/>
                     <property name="category"/>
                     <property name="level" value="INFO"/>
-                    <property name="auxiliary;index" value="32"/>
+                    <property name="auxiliary;index" value="34"/>
                 </properties>
             </pattern>
             <pattern name="Object to String" type="http://www.mulesoft.org/schema/mule/core/object-to-string-transformer" entity-id="Object to String#1">
@@ -366,18 +392,18 @@
                     <property name="ignoreBadInput"/>
                     <property name="encoding"/>
                     <property name="mimeType"/>
-                    <property name="auxiliary;index" value="33"/>
+                    <property name="auxiliary;index" value="35"/>
                 </properties>
             </pattern>
-            <pattern name="Java" type="http://www.mulesoft.org/schema/mule/core/component" entity-id="Java#1">
+            <pattern name="Java" type="http://www.mulesoft.org/schema/mule/core/component" entity-id="Java#2">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
                     <property name="class"/>
-                    <property name="auxiliary;index" value="34"/>
+                    <property name="auxiliary;index" value="36"/>
                     <property-collection name="@http://www.mulesoft.org/schema/mule/core/singleton-object;0">
                         <property name="class" value="test.XmlFileProcessor"/>
-                        <property name="auxiliary;index" value="35"/>
-                        <property name="auxiliary;wrapIn" value="35"/>
+                        <property name="auxiliary;index" value="37"/>
+                        <property name="auxiliary;wrapIn" value="37"/>
                     </property-collection>
                 </properties>
             </pattern>
@@ -387,7 +413,7 @@
                     <property name="message" value="End --flow2-- #[message]"/>
                     <property name="category"/>
                     <property name="level" value="WARN"/>
-                    <property name="auxiliary;index" value="36"/>
+                    <property name="auxiliary;index" value="38"/>
                 </properties>
             </pattern>
             <endpoint direction="Outbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#4">
@@ -404,20 +430,20 @@
                     <property name="mimeType"/>
                     <property name="responseTimeout"/>
                     <property name="tracking:enable-default-events"/>
-                    <property name="auxiliary;index" value="37"/>
+                    <property name="auxiliary;index" value="39"/>
                     <property name="exchange-pattern" value="one-way"/>
                     <property name="connector-ref" value="persistentVM"/>
                 </properties>
             </endpoint>
         </lane>
     </flow>
-    <flow SubFlow="true" name="flow3" entity-id="3c6dd22d-8a54-4c5f-89aa-8d13f217fb07">
+    <flow SubFlow="true" name="flow3" entity-id="6969533c-809c-480b-8213-d0a098afc735">
         <properties>
             <property name="processingStrategy"/>
             <property name="processingStrategy2"/>
             <property name="bussinessEventsLabel"/>
             <property name="tracking:enable-default-events"/>
-            <property name="auxiliary;index" value="38"/>
+            <property name="auxiliary;index" value="40"/>
         </properties>
         <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#4">
             <graphicalData x="0" y="0" width="0" height="0"/>
@@ -441,7 +467,7 @@
                     <property name="path" value="./data/out/csv"/>
                     <property name="outputPattern" value="#[message.inboundProperties.filename]"/>
                     <property name="mimeType"/>
-                    <property name="auxiliary;index" value="39"/>
+                    <property name="auxiliary;index" value="41"/>
                     <property name="responseTimeout"/>
                     <property name="connector-ref" value="fileConnector-1"/>
                 </properties>
@@ -452,7 +478,7 @@
                     <property name="message" value="&gt;&gt; FLOW-3 thread name: #[java.lang.Thread.currentThread().getName()]"/>
                     <property name="category"/>
                     <property name="level" value="WARN"/>
-                    <property name="auxiliary;index" value="40"/>
+                    <property name="auxiliary;index" value="42"/>
                 </properties>
             </pattern>
             <pattern name="Logger" type="http://www.mulesoft.org/schema/mule/core/logger" entity-id="Logger#7">
@@ -461,7 +487,7 @@
                     <property name="message" value="FLOW-3 batch id - #[message]"/>
                     <property name="category"/>
                     <property name="level" value="INFO"/>
-                    <property name="auxiliary;index" value="41"/>
+                    <property name="auxiliary;index" value="43"/>
                 </properties>
             </pattern>
             <pattern name="Object to String" type="http://www.mulesoft.org/schema/mule/core/object-to-string-transformer" entity-id="Object to String#2">
@@ -471,18 +497,18 @@
                     <property name="ignoreBadInput"/>
                     <property name="encoding"/>
                     <property name="mimeType"/>
-                    <property name="auxiliary;index" value="42"/>
+                    <property name="auxiliary;index" value="44"/>
                 </properties>
             </pattern>
-            <pattern name="Java" type="http://www.mulesoft.org/schema/mule/core/component" entity-id="Java#2">
+            <pattern name="Java" type="http://www.mulesoft.org/schema/mule/core/component" entity-id="Java#3">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
                     <property name="class"/>
-                    <property name="auxiliary;index" value="43"/>
+                    <property name="auxiliary;index" value="45"/>
                     <property-collection name="@http://www.mulesoft.org/schema/mule/core/singleton-object;0">
                         <property name="class" value="test.CsvFileProcessor"/>
-                        <property name="auxiliary;index" value="44"/>
-                        <property name="auxiliary;wrapIn" value="44"/>
+                        <property name="auxiliary;index" value="46"/>
+                        <property name="auxiliary;wrapIn" value="46"/>
                     </property-collection>
                 </properties>
             </pattern>
@@ -492,41 +518,10 @@
                     <property name="message" value="End --flow3-- #[message]"/>
                     <property name="category"/>
                     <property name="level" value="WARN"/>
-                    <property name="auxiliary;index" value="45"/>
+                    <property name="auxiliary;index" value="47"/>
                 </properties>
             </pattern>
             <endpoint direction="Outbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#5">
-                <graphicalData x="0" y="0" width="0" height="0"/>
-                <properties>
-                    <property name="ref"/>
-                    <property name="transformer-refs"/>
-                    <property name="address"/>
-                    <property name="businessEventsLabel"/>
-                    <property name="encoding"/>
-                    <property name="path" value="queue.complete"/>
-                    <property name="responseTransformer-refs"/>
-                    <property name="disableTransportTransformer"/>
-                    <property name="mimeType"/>
-                    <property name="responseTimeout"/>
-                    <property name="tracking:enable-default-events"/>
-                    <property name="auxiliary;index" value="46"/>
-                    <property name="exchange-pattern" value="one-way"/>
-                    <property name="connector-ref" value="persistentVM"/>
-                </properties>
-            </endpoint>
-        </lane>
-    </flow>
-    <flow SubFlow="false" name="aggregate-flow" entity-id="d796de74-8e4d-40b9-b40f-e8fc37212451">
-        <properties>
-            <property name="processingStrategy"/>
-            <property name="processingStrategy2"/>
-            <property name="bussinessEventsLabel"/>
-            <property name="tracking:enable-default-events"/>
-            <property name="auxiliary;index" value="47"/>
-        </properties>
-        <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#5">
-            <graphicalData x="0" y="0" width="0" height="0"/>
-            <endpoint direction="Inbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#6">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
                     <property name="ref"/>
@@ -545,6 +540,37 @@
                     <property name="connector-ref" value="persistentVM"/>
                 </properties>
             </endpoint>
+        </lane>
+    </flow>
+    <flow SubFlow="false" name="aggregate-flow" entity-id="e2c342ab-04f3-4e11-91f2-093cd76b7a66">
+        <properties>
+            <property name="processingStrategy"/>
+            <property name="processingStrategy2"/>
+            <property name="bussinessEventsLabel"/>
+            <property name="tracking:enable-default-events"/>
+            <property name="auxiliary;index" value="49"/>
+        </properties>
+        <lane hadOnlyOneElement="false" index="0" isChoiceOtherwiseLane="false" entity-id="compartment-lane#5">
+            <graphicalData x="0" y="0" width="0" height="0"/>
+            <endpoint direction="Inbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#6">
+                <graphicalData x="0" y="0" width="0" height="0"/>
+                <properties>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                    <property name="address"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="encoding"/>
+                    <property name="path" value="queue.complete"/>
+                    <property name="responseTransformer-refs"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="mimeType"/>
+                    <property name="responseTimeout"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="auxiliary;index" value="50"/>
+                    <property name="exchange-pattern" value="one-way"/>
+                    <property name="connector-ref" value="persistentVM"/>
+                </properties>
+            </endpoint>
             <pattern name="Collection Aggregator" type="http://www.mulesoft.org/schema/mule/core/collection-aggregator" entity-id="Collection Aggregator#1">
                 <graphicalData x="0" y="0" width="0" height="0"/>
                 <properties>
@@ -552,7 +578,7 @@
                     <property name="failOnTimeout" value="true"/>
                     <property name="storePrefix"/>
                     <property name="tracking:enable-default-events"/>
-                    <property name="auxiliary;index" value="49"/>
+                    <property name="auxiliary;index" value="51"/>
                     <property name="timeout" value="20000"/>
                 </properties>
             </pattern>
@@ -562,7 +588,7 @@
                     <property name="message" value="final message - #[message + payload]"/>
                     <property name="category"/>
                     <property name="level" value="INFO"/>
-                    <property name="auxiliary;index" value="50"/>
+                    <property name="auxiliary;index" value="52"/>
                 </properties>
             </pattern>
             <pattern name="Logger" type="http://www.mulesoft.org/schema/mule/core/logger" entity-id="Logger#10">
@@ -571,9 +597,28 @@
                     <property name="message" value="processing complete for - #[message.inboundProperties.filename]"/>
                     <property name="category"/>
                     <property name="level" value="INFO"/>
-                    <property name="auxiliary;index" value="51"/>
+                    <property name="auxiliary;index" value="53"/>
                 </properties>
             </pattern>
+            <endpoint direction="Outbound" message-exchange-pattern="OneWay" name="VM" type="http://www.mulesoft.org/schema/mule/vm/endpoint" entity-id="VM#7">
+                <graphicalData x="0" y="0" width="0" height="0"/>
+                <properties>
+                    <property name="ref"/>
+                    <property name="transformer-refs"/>
+                    <property name="address"/>
+                    <property name="businessEventsLabel"/>
+                    <property name="encoding"/>
+                    <property name="path" value="queue.complete.next"/>
+                    <property name="responseTransformer-refs"/>
+                    <property name="disableTransportTransformer"/>
+                    <property name="mimeType"/>
+                    <property name="responseTimeout"/>
+                    <property name="tracking:enable-default-events"/>
+                    <property name="auxiliary;index" value="54"/>
+                    <property name="exchange-pattern" value="one-way"/>
+                    <property name="connector-ref" value="persistentVM"/>
+                </properties>
+            </endpoint>
         </lane>
     </flow>
     <description></description>

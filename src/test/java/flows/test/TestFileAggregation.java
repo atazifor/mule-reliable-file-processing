@@ -23,9 +23,10 @@ import org.mule.tck.junit4.FunctionalTestCase;
 
 public class TestFileAggregation extends FunctionalTestCase {
 	@Rule
-    public Timeout globalTimeout = new Timeout(120000);
+    public Timeout globalTimeout = new Timeout(120000);//
 	
-	CountDownLatch latch;
+	CountDownLatch dispatcLatch;
+	CountDownLatch receiveLatch;
 	
 	@Override
 	protected String getConfigResources() {
@@ -46,31 +47,41 @@ public class TestFileAggregation extends FunctionalTestCase {
         //using VM 
         new File("./data/out/xml").mkdirs();
         
-        latch = new CountDownLatch(2);
         muleContext.registerListener(new EndpointMessageNotificationListener() {
             public void onNotification(final ServerNotification notification) {
             	logger.warn("ResourceIdentifier#: " + notification.getResourceIdentifier() + ": " +notification.getActionName());
-                if ("aggregate-flow".equals(notification.getResourceIdentifier())
-                        && "receive".equals(notification.getActionName())) {
-                	logger.warn("count " + notification.getResourceIdentifier());
-                	latch.countDown();
-                }
+                if ("aggregate-flow".equals(notification.getResourceIdentifier())){
+                	if("receive".equals(notification.getActionName()))
+                		receiveLatch.countDown();
+                	if("end dispatch".equals(notification.getActionName()))
+                		dispatcLatch.countDown();
+                }		
             }
         });
         
 	}
-	
+	/**
+	 * Expected pairs of files are put in inbound end point
+	 * @throws Exception
+	 */
 	@Test
-	public void testFiles() throws Exception{
+	public void testConsistentFiles() throws Exception{
+		int counter = 5; //total of 10 files; 5 csv, 5 xml
+		receiveLatch = new CountDownLatch(counter*2);// 10 files should be processed in groups of 2
+        dispatcLatch = new CountDownLatch(counter);//5 groups of files (after aggregation)
 	        assertThat(0, is(FileUtils.listFiles(new File("./data/out"), new String[]{"xml", "csv"}, false).size()));
-	        File csvFile = new File("./data/zip/first.csv");
-	        File xmlFile = new File("./data/zip/second.xml");
-	        
-			FileUtils.writeStringToFile(csvFile,"csv is okay");
-			FileUtils.writeStringToFile(xmlFile,"xml is better");
+	        File csvFile;
+	        File xmlFile;
+	        for (int i = 0; i < 5; i++) {
+				csvFile = new File("./data/zip/1"+i+"-first"+i+".csv");
+				xmlFile = new File("./data/zip/1"+i+"-second"+i+".xml");
+				FileUtils.writeStringToFile(csvFile, "csv is okay");
+				FileUtils.writeStringToFile(xmlFile, "xml is better");
+			}
 			createZipFile("./data/zip", "./data/zip/in");
 			//zip("./data/zip", "./data/zip/in/archive.zip");
-			assertTrue(latch.await(10000, TimeUnit.SECONDS));
+			assertTrue(receiveLatch.await(getTestTimeoutSecs(), TimeUnit.SECONDS));
+			assertTrue(dispatcLatch.await(getTestTimeoutSecs(), TimeUnit.SECONDS));
 	}
 	
 	private void createZipFile(String srcDir, String zipFile) throws Exception{

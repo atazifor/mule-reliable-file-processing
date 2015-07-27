@@ -12,6 +12,7 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
 		<spring:bean id="FileUnzipTransformer" name="FileUnzipTransformer" class="test.FileUnzipTransformer">
 		</spring:bean>
         <spring:bean id="unzipTransformer" name="unzipTransformer" class="test.UnzipTransformer"/>
+        <spring:bean id="correlationId" name="correlationId" class="test.transformer.CorrelationIdProcessor" scope="singleton"/>
 	</spring:beans>
 	
     <notifications dynamic="true">
@@ -31,7 +32,10 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
         <file:inbound-endpoint path="./data/zip/in" pollingFrequency="6000" connector-ref="fileConnector-1" doc:name="File">
             <file:filename-regex-filter pattern=".*zip$" caseSensitive="false"/>
         </file:inbound-endpoint>
-        <set-property value="#[message.inboundProperties.originalFilename.substring(0,2)]" propertyName="MULE_CORRELATION_ID" doc:name="Property" />
+        <component doc:name="Java">
+            <spring-object bean="correlationId"/>
+        </component>
+<!--         <set-property value="#[message.inboundProperties.originalFilename.substring(0,2)]" propertyName="MULE_CORRELATION_ID" doc:name="Property" /> -->
         <set-property value="2" propertyName="MULE_CORRELATION_GROUP_SIZE" doc:name="Property" />
 <!--         <logger message="the batch id - #[message.correlationId]" level="INFO" doc:name="Logger"/> -->
         <logger message=">> get-zip-file thread name: #[java.lang.Thread.currentThread().getName()]" level="WARN" doc:name="Logger"/>
@@ -84,11 +88,12 @@ http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/cor
         <vm:outbound-endpoint exchange-pattern="one-way" path="queue.complete" connector-ref="persistentVM" doc:name="VM"/>
     </sub-flow>
     
-    <flow name="aggregate-flow">
+    <flow name="aggregate-flow" doc:name="aggregate-flow">
     	<vm:inbound-endpoint exchange-pattern="one-way" connector-ref="persistentVM" path="queue.complete" doc:name="VM"/>
-    	<collection-aggregator failOnTimeout="true" timeout="20000"/>
+    	<collection-aggregator failOnTimeout="true" timeout="20000" doc:name="Collection Aggregator"/>
     	<logger message="final message - #[message + payload]" level="INFO" doc:name="Logger"/>
     	<logger message="processing complete for - #[message.inboundProperties.filename]" level="INFO" doc:name="Logger"/>
+    	<vm:outbound-endpoint exchange-pattern="one-way" path="queue.complete.next" connector-ref="persistentVM" doc:name="VM"/>
     </flow>
  
     
